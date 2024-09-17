@@ -7,56 +7,63 @@ Created on Wed Aug  9 17:08:45 2023
 
 import pygame 
 from Set_Up import *
+import Debug
 
     
-class Tile(pygame.sprite.Sprite):
-    def __init__(self, identifier, pos, groups, sprite_type, surface = pygame.Surface((TILE_SIZE, TILE_SIZE))):
-        super().__init__(groups)
+class Tile():
+    def __init__(self, identifier, pos, coordinates, groups, sprite_type, surface = pygame.Surface((TILE_SIZE, TILE_SIZE))):
 
         self.identifier = identifier
         self.image = surface
         self.sprite_type = sprite_type
-        self.rect = self.image.get_rect(topleft = pos)
-        self.coordinates = (round(pos[0] / TILE_SIZE, 0), round(pos[1] / TILE_SIZE, 0))
-        self.hitbox = self.rect
-
-
+        self.pos = pos
+        self.hitbox_rect = pygame.Rect(pos[0],pos[1],12,12)
+        self.hitbox_rect.center = (self.pos[0]+(TILE_SIZE/2),self.pos[1]+(TILE_SIZE/2))
+        self.coordinates = coordinates
+        self.display = pygame.display.get_surface()
         self.animation_time = 0
+        self.exists = True
 
-        if self.sprite_type == 'Walls':
-            #test
+        for I in groups:
+            I.append(self)
+            
+        self.preload()
+        
 
-            self.hitbox.y -= 6
-            self.hitbox.x -= 6
-            """
-            highlight = pygame.Surface(self.hitbox.size)
-            highlight.fill((255, 255, 0))
-            highlight.set_alpha(128)
-            self.image.blit(highlight, (0, 0))
-            """
-
-        if  self.sprite_type == 'Gate':
-            self.hitbox.y -= 6
-            self.hitbox.x -= 6
+    def preload(self):
+        
+        
+        if self.identifier == '1':
+            self.power_pellet_image1 = pygame.image.load('Assets/Pellets/Power Pellet.png').convert_alpha()
+            self.power_pellet_image2 = pygame.image.load('Assets/Pellets/More Pellets/Power Pellet 2.png').convert_alpha()
 
 
-        if self.sprite_type == 'Objects':
-            self.hitbox = self.rect.inflate(-4, -4)
-            self.rect = self.hitbox
 
     def animate_power_pelete(self):
-        self.animation_time+=1
-        if self.animation_time < 60:
-            self.image = pygame.image.load('Assets/Pellets/Power Pellet.png').convert_alpha()
-        elif self.animation_time < 120:
-            self.image = pygame.image.load('Assets/Pellets/More Pellets/Power Pellet 2.png').convert_alpha()
-        else: self.animation_time=0
+            
+            if self.identifier == '1':
+                self.animation_time+=1
+                if self.animation_time < 65:
+                    self.image = self.power_pellet_image1
+                elif self.animation_time < 130:
+                    self.image = self.power_pellet_image2
+                else: self.animation_time=0
 
+    def drawer(self):
+        if self.exists:
+            self.display.blit(self.image, (self.pos))
+            #pygame.draw.rect(self.display, (255,0,0), self.hitbox_rect)
+
+    def kill(self):
+
+        self.exists = False
 
     def update(self):
-        if self.identifier == '1':
-            self.animate_power_pelete()
 
+        self.animate_power_pelete()
+        self.drawer()
+        
+   
 
 
 

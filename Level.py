@@ -5,13 +5,14 @@ Created on Wed Aug  9 17:23:19 2023
 @author: footb
 """
 
-#import pygame
+import pygame
 import CSV
 from Set_Up import *
 from Wall_Sprite import Tile
 from Player import Player
 from Debug import debug
 from Enemy import Enemy
+from SpriteGroup import SpriteGroup
 
 class Level:
 
@@ -19,14 +20,14 @@ class Level:
         
         self.display_surface = pygame.display.get_surface()
         
-        self.visible_sprites = pygame.sprite.Group()
-        self.obstacle_sprites_ai = pygame.sprite.Group()
-        self.obstacle_sprites_player = pygame.sprite.Group()
-        self.enemy_sprites=pygame.sprite.Group()
-        self.pickup_sprites = pygame.sprite.Group()
-        
+        self.visible_sprites = []
+        self.obstacle_sprites_ai = []
+        self.obstacle_sprites_player = []
+        self.pickup_sprites = []
+        self.wall_sprites = SpriteGroup()
+        self.enemy_sprites = SpriteGroup()
+
         self.create_map()
-        
     def create_map(self):
         layouts = {
             'Walls' : CSV.csv_layout('Map Layout/PacMan Layout_Walls.csv'),
@@ -49,25 +50,39 @@ class Level:
                       y = row_index * TILE_SIZE
                       if style == 'Walls':
                             surf = graphics['Walls'][int(col)]
-                            Tile('Wall',(x,y),[self.visible_sprites ,self.obstacle_sprites_ai, self.obstacle_sprites_player],'Walls',surf)
+                            Current_Tile=Tile('Wall',(x,y),(col_index, row_index),[self.visible_sprites,self.obstacle_sprites_ai, self.obstacle_sprites_player],'Walls',surf)
+                            self.wall_sprites.add(Current_Tile)
 
                       if style == 'Objects':
 
                             surf = graphics['Objects'][int(col)]
-                            Tile((col),(x, y), [self.visible_sprites, self.pickup_sprites], 'Objects', surf)
+                            Current_Tile=Tile((col),(x, y),(col_index, row_index),[self.visible_sprites, self.pickup_sprites], 'Objects', surf)
+                            self.wall_sprites.add(Current_Tile)
 
                       if style == 'Gate':
                              surf = graphics['Gate'][int(col)]
-                             Tile('Gate', (x, y), [self.visible_sprites, self.obstacle_sprites_player], 'Gate', surf)
+                             Current_Tile=Tile('Gate', (x, y),(col_index, row_index),[self.visible_sprites, self.obstacle_sprites_player], 'Gate', surf)
+                             self.wall_sprites.add(Current_Tile)
 
 
-        self.player = Player((TILE_SIZE*13, TILE_SIZE*26),[self.visible_sprites], self.obstacle_sprites_player, self.pickup_sprites)
-        self.blinky = Enemy('Blinky',(TILE_SIZE*13.33, TILE_SIZE*14), [self.visible_sprites, self.enemy_sprites], self.player, self.obstacle_sprites_ai)
+        self.player = Player((TILE_SIZE*13, TILE_SIZE*26), self.obstacle_sprites_player, self.pickup_sprites)
 
-                
+        Ghosts = CSV.get_folder_names('Assets/Ghosts')
+       
+        for Ghost in Ghosts:
+             self.enemy_sprites.add(Enemy(Ghost, [self.visible_sprites, self.enemy_sprites], self.player, self.obstacle_sprites_player, self.enemy_sprites))
+        self.player.get_enemies(self.enemy_sprites)
+
+        
+    
+
     def run(self):
 
-        debug(self.blinky.instant_target_point)
-        self.visible_sprites.draw(self.display_surface)
-        self.visible_sprites.update()
+        self.player.update()
+        self.wall_sprites.update()
+        self.enemy_sprites.update()
+       
+        
+        
 
+      
