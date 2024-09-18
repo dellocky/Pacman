@@ -27,7 +27,10 @@ class Level:
         self.wall_sprites = SpriteGroup()
         self.enemy_sprites = SpriteGroup()
 
+        self.is_ticking = True
+
         self.create_map()
+        
     def create_map(self):
         layouts = {
             'Walls' : CSV.csv_layout('Map Layout/PacMan Layout_Walls.csv'),
@@ -36,11 +39,12 @@ class Level:
         }
 
         graphics = {
-            'Walls': CSV.import_folder('Assets/Wall Pieces'),
-            'Objects': CSV.import_folder('Assets/Pellets'),
-            'Gate': CSV.import_folder('Assets/Gate'),
+            'Walls': CSV.import_folder_list_dict('Assets/Wall Pieces'),
+            'Objects': CSV.import_folder_list_dict('Assets/Pellets'),
+            'Gate': CSV.import_folder_list_dict('Assets/Gate'),
+            
         }
-
+        
 
         for style, layout in layouts.items():
             for row_index, row in enumerate(layout):
@@ -49,19 +53,20 @@ class Level:
                       x = col_index * TILE_SIZE
                       y = row_index * TILE_SIZE
                       if style == 'Walls':
-                            surf = graphics['Walls'][int(col)]
-                            Current_Tile=Tile('Wall',(x,y),(col_index, row_index),[self.visible_sprites,self.obstacle_sprites_ai, self.obstacle_sprites_player],'Walls',surf)
+                            surf = graphics['Walls'][int(col)][0]
+                            Current_Tile=Tile(graphics['Walls'][int(col)][1],(x,y),(col_index, row_index),[self.visible_sprites,self.obstacle_sprites_ai, self.obstacle_sprites_player],'Walls',surf)
                             self.wall_sprites.add(Current_Tile)
 
                       if style == 'Objects':
 
-                            surf = graphics['Objects'][int(col)]
-                            Current_Tile=Tile((col),(x, y),(col_index, row_index),[self.visible_sprites, self.pickup_sprites], 'Objects', surf)
+                            surf = graphics['Objects'][int(col)][0]
+                            Current_Tile=Tile(graphics['Objects'][int(col)][1],(x, y),(col_index, row_index),[self.visible_sprites, self.pickup_sprites], 'Objects', surf)
                             self.wall_sprites.add(Current_Tile)
+                        
 
                       if style == 'Gate':
-                             surf = graphics['Gate'][int(col)]
-                             Current_Tile=Tile('Gate', (x, y),(col_index, row_index),[self.visible_sprites, self.obstacle_sprites_player], 'Gate', surf)
+                             surf = graphics['Gate'][int(col)][0]
+                             Current_Tile=Tile(graphics['Gate'][int(col)][1], (x, y),(col_index, row_index),[self.visible_sprites, self.obstacle_sprites_player], 'Gate', surf)
                              self.wall_sprites.add(Current_Tile)
 
 
@@ -78,9 +83,10 @@ class Level:
 
     def run(self):
 
-        self.player.update()
-        self.wall_sprites.update()
-        self.enemy_sprites.update()
+        if  self.is_ticking:
+            self.player.update()
+            self.wall_sprites.update()
+            self.enemy_sprites.update()
        
         
         

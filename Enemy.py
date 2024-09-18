@@ -74,7 +74,9 @@ class Enemy():
         self.hitbox_rect.center = (self.pos[0]+(TILE_SIZE/2),self.pos[1]+(TILE_SIZE/2))
         self.test_rect = None
     
-        self.image_dict= CSV.import_folder_dict(f'Assets/Ghosts/{self.identifier}', (19, 19))
+        self.base_images = CSV.import_folder_dict(f'Assets/Ghosts/{self.identifier}', (19, 19))
+        self.highlighted_images = CSV.import_folder_dict('Assets/Ghost States/Eaten')
+        self.eaten_images = CSV.import_folder_dict('Assets/Ghost States/Highlighted')
 
         self.potential_directions = []
         self.speed = .575
@@ -100,7 +102,13 @@ class Enemy():
         self.coordinates = (round(self.pos[0] / TILE_SIZE, 0), round(self.pos[1] / TILE_SIZE, 0))
     
     def update_image(self):
-        self.image = self.image_dict[f"{self.identifier} Eyes {self.direction} {self.animation_state}"]
+        if self.AI_mode != "Flee" or "Eaten":
+            self.image = self.base_images[f"{self.identifier} Eyes {self.direction} {self.animation_state}"]
+        
+        if self.AI_mode == "Flee":
+            if self.player.empowered_time > 200:
+                self.image = self.highlighted_images[f"Highlighted Blue [animimation_state]"]
+            
 
     def move(self, speed):
 
@@ -118,6 +126,7 @@ class Enemy():
 
             self.pos=(-6, self.pos[1])
             self.instant_target_point = (0, 17)
+
 
     def turn(self, vector):
          
@@ -139,20 +148,20 @@ class Enemy():
              self.update_image()
 
     def aquire_target(self):
+        if self.AI_mode == "Chase":
+            if self.identifier == 'Blinky':
+                self.target_point = self.player.coordinates
 
-        if self.identifier == 'Blinky':
-            self.target_point = self.player.coordinates
+            if self.identifier == 'Pinky':
+                self.target_point = ((self.player.coordinates[0]+self.player.vector[0]*2), (self.player.coordinates[1]+self.player.vector[1]*2))
 
-        if self.identifier == 'Pinky':
-            self.target_point = ((self.player.coordinates[0]+self.player.vector[0]*2), (self.player.coordinates[1]+self.player.vector[1]*2))
+            if self.identifier == 'Inky':
 
-        if self.identifier == 'Inky':
+                self.target_point = ((self.player.coordinates[0]-self.player.vector[0]*2), (self.player.coordinates[1]-self.player.vector[1]*2))
+                
+            if self.identifier == 'Clyde':
 
-            self.target_point = ((self.player.coordinates[0]-self.player.vector[0]*2), (self.player.coordinates[1]-self.player.vector[1]*2))
-            
-        if self.identifier == 'Clyde':
-
-            self.target_point = ((round(self.player.coordinates[0]-self.player.vector[0]*6)), (round(self.player.coordinates[1]-self.player.vector[1]*6)))
+                self.target_point = ((round(self.player.coordinates[0]-self.player.vector[0]*6)), (round(self.player.coordinates[1]-self.player.vector[1]*6)))
         
 
     def spawn(self):
@@ -190,7 +199,7 @@ class Enemy():
 
 
 
-    def movement_countdown(self):
+    def movement_tick(self):
         if self.pos_delay_active:
             self.pos_countdown -=1
             #if self.identifier == 'Inky':
@@ -215,10 +224,6 @@ class Enemy():
                     self.AI_mode = "Chase"
                     self.aquire_target()
                     self.navigate()
-                  
-                  
-                 
-
         
                 
             
@@ -266,14 +271,14 @@ class Enemy():
             self.pos_countdown = AI_Calculations.get_time(self.pos[1], target_pos[1], self.speed)
 
 
-    def spawn_countdown(self):
+    def spawn_tick(self):
         if self.AI_mode == "Spawn":
             self.spawn_delay_time -= 1
             if self.spawn_delay_time <= 0:
                  self.spawn_1()
 
 
-    def animate(self):
+    def animate_tick(self):
         
         self.animation_countdown += 1
         if self.animation_countdown >= 65:
@@ -290,19 +295,20 @@ class Enemy():
 
     def tick(self):
 
-        self.spawn_countdown()
-        self.animate()
-        self.movement_countdown()
+        self.spawn_tick()
+        self.animate_tick()
+        self.movement_tick()
     
     def update(self):
-        if self.AI_mode == "Chase":
-            self.aquire_target()
+        
+        self.aquire_target()
         if self.coordinates == self.instant_target_point:
                 self.pos_delay_active = True
         self.tick()
         self.move(self.speed)
         self.drawer()
-        #if self.identifier == "Pinky":
+        #if self.identifier == "Blinky":
+            #print(self.AI_mode)
 
 
         

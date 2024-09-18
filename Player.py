@@ -22,7 +22,9 @@ class Player():
         self.hitbox_rect = pygame.Rect(100,100,8,8)
         self.hitbox_rect.center = (self.pos[0]+(TILE_SIZE/2),self.pos[1]+(TILE_SIZE/2))
         self.last_direction='Left'
+        
         self.canmove = True
+        self.empowered = False
 
         self.vector = (0, 0)
         self.speed = .575
@@ -32,6 +34,7 @@ class Player():
         self.object_sprites = object_sprites
 
         self.animation_time=0
+        self.empowered_time = 0
     
     def get_enemies(self, enemy_sprites):
         self.enemy_sprites = enemy_sprites
@@ -91,18 +94,21 @@ class Player():
 
         self.update_coordinates()
 
-    def animate(self):
+    def animate_tic(self):
+
         self.animation_time += 1
-        current_image = self.image
         if self.animation_time<10:
             self.image = self.image_dict[f"Player {self.last_direction}"]
 
         elif self.animation_time<20:
-            self.image = self.image_dict["Player Full"]
+            if self.vector == (0, 0):
+                self.image = self.image_dict[f"Player {self.last_direction}"]
+                self.animation_time = 0
             
-
+            else:
+                self.image = self.image_dict["Player Full"]
+        
         if self.animation_time>=20:
-            self.image=current_image
             self.animation_time=0
 
 
@@ -141,11 +147,41 @@ class Player():
         for sprite in self.object_sprites:
             if sprite.hitbox_rect.colliderect(self.hitbox_rect):
                 sprite.kill()
+                if sprite.identifier == 'Power Pellet 1':
+                    self.empowered_time = FPS * 10
+                    self.empowered = True
+                    print("test")
+                    for enemy in self.enemy_sprites:
+                        print(enemy.identifier)
+                        sprite.AI_Mode = 'Flee'
+    
+    def empowered_time_tic(self):
+        if self.empowered:
+            if self.empowered_time > 0:
+                self.empowered_time -= 1
+            else: 
+                self.empowered = False
+                for sprite in self.enemy_sprites:
+                    sprite.AI_Mode = 'Chase'
+
+
 
     def enemy_collision(self):
         for sprite in self.enemy_sprites:
             if sprite.hitbox_rect.colliderect(self.hitbox_rect):
-                pass
+                if self.empowered:
+                    print("Kill")
+                else: print("Die")
+
+    def tic(self):
+
+        self.animate_tic()
+        self.empowered_time_tic()
+
+    def collide(self):
+        self.object_collision()
+        self.wall_collision(self.vector)
+        self.enemy_collision()
 
     def drawer(self):
         self.display.blit(self.image, (self.pos))
@@ -154,12 +190,11 @@ class Player():
     def update(self):
         if self.canmove:
             self.input()
+        self.tic()
         self.move(self.speed)
-        self.object_collision()
-        self.wall_collision(self.vector)
-        self.enemy_collision()
-        self.animate()
+        self.collide()
         self.drawer()
+        Debug.debug(self.empowered_time)
         
 
         

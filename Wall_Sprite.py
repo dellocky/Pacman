@@ -28,20 +28,19 @@ class Tile():
             I.append(self)
             
         self.preload()
-        
 
     def preload(self):
         
         
-        if self.identifier == '1':
-            self.power_pellet_image1 = pygame.image.load('Assets/Pellets/Power Pellet.png').convert_alpha()
-            self.power_pellet_image2 = pygame.image.load('Assets/Pellets/More Pellets/Power Pellet 2.png').convert_alpha()
+        if self.identifier == 'Power Pellet 1':
+            self.power_pellet_image1 = pygame.image.load('Assets/Pellets/Power Pellet 1.png').convert_alpha()
+            self.power_pellet_image2 = pygame.image.load('Assets/Pellets/Power Pellet 2.png').convert_alpha()
 
 
 
     def animate_power_pelete(self):
             
-            if self.identifier == '1':
+            if self.identifier == 'Power Pellet 1':
                 self.animation_time+=1
                 if self.animation_time < 65:
                     self.image = self.power_pellet_image1
@@ -57,6 +56,7 @@ class Tile():
     def kill(self):
 
         self.exists = False
+        self.hitbox_rect 
 
     def update(self):
 
