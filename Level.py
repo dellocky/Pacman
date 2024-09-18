@@ -55,19 +55,19 @@ class Level:
                       if style == 'Walls':
                             surf = graphics['Walls'][int(col)][0]
                             Current_Tile=Tile(graphics['Walls'][int(col)][1],(x,y),(col_index, row_index),[self.visible_sprites,self.obstacle_sprites_ai, self.obstacle_sprites_player],'Walls',surf)
-                            self.wall_sprites.add(Current_Tile)
+                            self.wall_sprites.append(Current_Tile)
 
                       if style == 'Objects':
 
                             surf = graphics['Objects'][int(col)][0]
                             Current_Tile=Tile(graphics['Objects'][int(col)][1],(x, y),(col_index, row_index),[self.visible_sprites, self.pickup_sprites], 'Objects', surf)
-                            self.wall_sprites.add(Current_Tile)
+                            self.wall_sprites.append(Current_Tile)
                         
 
                       if style == 'Gate':
                              surf = graphics['Gate'][int(col)][0]
                              Current_Tile=Tile(graphics['Gate'][int(col)][1], (x, y),(col_index, row_index),[self.visible_sprites, self.obstacle_sprites_player], 'Gate', surf)
-                             self.wall_sprites.add(Current_Tile)
+                             self.wall_sprites.append(Current_Tile)
 
 
         self.player = Player((TILE_SIZE*13, TILE_SIZE*26), self.obstacle_sprites_player, self.pickup_sprites)
@@ -75,7 +75,7 @@ class Level:
         Ghosts = CSV.get_folder_names('Assets/Ghosts')
        
         for Ghost in Ghosts:
-             self.enemy_sprites.add(Enemy(Ghost, [self.visible_sprites, self.enemy_sprites], self.player, self.obstacle_sprites_player, self.enemy_sprites))
+             self.enemy_sprites.append(Enemy(Ghost, [self.visible_sprites, self.enemy_sprites], self.player, self.obstacle_sprites_player, self.enemy_sprites))
         self.player.get_enemies(self.enemy_sprites)
 
         

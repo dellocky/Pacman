@@ -91,7 +91,6 @@ class Enemy():
         self.update_image()
 
         self.obstacle_sprites = obstacle_sprites
-        enemy_sprites.append(self)
             
     def get_blinky(self, enemy_sprites):
         for ghost in enemy_sprites:
