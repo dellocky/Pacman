@@ -7,23 +7,19 @@ Created on Wed Aug  9 18:56:35 2023
 
 
 from Set_Up import *
-import Debug
+#import Debug
 import CSV
+import Sprite
 
-class Player():
+class Player(Sprite.Sprite):
     def __init__(self, pos, obstacle_sprites, object_sprites):
-        self.pos = pos
-        self.coordinates = (round(pos[0] / TILE_SIZE, 0), round(pos[1] / TILE_SIZE, 0))
-        self.image_dict= CSV.import_folder_dict('Assets/Pacman Model', (19, 19))
-        self.image = self.image_dict["Player Left"]
-        self.display = pygame.display.get_surface()
+        #print(pos)
+        super().__init__("Player", pos, (TILE_SIZE/2))
         
-
-        self.hitbox_rect = pygame.Rect(100,100,8,8)
-        self.hitbox_rect.center = (self.pos[0]+(TILE_SIZE/2),self.pos[1]+(TILE_SIZE/2))
+        self.image_dict= CSV.import_folder_dict('Assets/Pacman Model', (TILE_SIZE*1.25, TILE_SIZE*1.25))
+        self.image = self.image_dict["Player Left"]
         self.last_direction='Left'
         
-        self.canmove = True
         self.empowered = False
 
         self.vector = (0, 0)
@@ -36,10 +32,9 @@ class Player():
         self.animation_time=0
         self.empowered_time = 0
     
+    
     def get_enemies(self, enemy_sprites):
         self.enemy_sprites = enemy_sprites
-        
-        
         
     def input(self):
         keys = pygame.key.get_pressed()
@@ -56,43 +51,10 @@ class Player():
         elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.vector = (-1, 0)
             self.last_direction = 'Left'
-    """else:
-            self.vector = (0, 0)
-            self.animation_time=0
-            if self.last_direction == 'up':
-                self.image = self.image_dict["Player Up"]
-                
-            if self.last_direction == 'down':
-                self.image = self.image_dict["Player Down"]
-                
-            if self.last_direction == 'right':
-                self.image = self.image_dict["Player Right"]
-                
-            if self.last_direction == 'left':
-                self.image = self.image_dict["Player Left"]
-                 """
 
         #Debug.highlight_hitbox(self.hitbox_rect, self.image, "green")
         
-        
-    def update_coordinates(self):
-        self.coordinates = (round(self.pos[0] / TILE_SIZE, 0), round(self.pos[1] / TILE_SIZE, 0))
-
-    def move(self, speed):
-     if self.canmove:
-        self.pos = (self.pos[0]+self.vector[0]*speed, self.pos[1]+self.vector[1]*speed)
-        self.hitbox_rect.center = (self.pos[0]+(TILE_SIZE/2),self.pos[1]+(TILE_SIZE/2))
-
-        if self.hitbox_rect.x < -12:
-
-            self.pos =(442, self.pos[1])
-
-
-        elif self.hitbox_rect.x > 448:
-
-            self.pos=(-6, self.pos[1])
-
-        self.update_coordinates()
+    
 
     def animate_tic(self):
 
@@ -146,14 +108,13 @@ class Player():
     def object_collision(self):
         for sprite in self.object_sprites:
             if sprite.hitbox_rect.colliderect(self.hitbox_rect):
-                sprite.kill()
-                if sprite.identifier == 'Power Pellet 1':
+                self.object_sprites.remove(sprite)
+                if sprite.name == 'Power Pellet 1':
                     self.empowered_time = FPS * 10
                     self.empowered = True
-                    print("test")
                     for enemy in self.enemy_sprites:
-                        print(enemy.identifier)
-                        sprite.AI_Mode = 'Flee'
+                        enemy.initiate_flee()
+    
     
     def empowered_time_tic(self):
         if self.empowered:
@@ -161,17 +122,19 @@ class Player():
                 self.empowered_time -= 1
             else: 
                 self.empowered = False
-                for sprite in self.enemy_sprites:
-                    sprite.AI_Mode = 'Chase'
-
-
-
+                for enemy in self.enemy_sprites:
+                    enemy.end_flee()
+                   
+    
     def enemy_collision(self):
-        for sprite in self.enemy_sprites:
-            if sprite.hitbox_rect.colliderect(self.hitbox_rect):
-                if self.empowered:
-                    print("Kill")
-                else: print("Die")
+        for enemy in self.enemy_sprites:
+            if enemy.hitbox_rect.colliderect(self.hitbox_rect):
+                if enemy.AI_mode == 'Flee':
+                    enemy.initiate_eaten()
+                elif enemy.AI_mode == 'Eaten':
+                    return
+                #else: print("die")
+                
 
     def tic(self):
 
@@ -183,18 +146,13 @@ class Player():
         self.wall_collision(self.vector)
         self.enemy_collision()
 
-    def drawer(self):
-        self.display.blit(self.image, (self.pos))
-        #pygame.draw.rect(self.display, (0,0,255), self.hitbox_rect)
-
     def update(self):
-        if self.canmove:
-            self.input()
+        self.input()
         self.tic()
         self.move(self.speed)
         self.collide()
-        self.drawer()
-        Debug.debug(self.empowered_time)
+        self.draw()
+
         
 
         

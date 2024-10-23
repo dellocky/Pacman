@@ -6,6 +6,7 @@ Created on Fri Aug  4 00:48:16 2023
 """
 
 import pygame
+from timeit import default_timer
 
 pygame.init()
 font=pygame.font.Font(None, 25)
@@ -16,12 +17,12 @@ def debug(info, x=10 ,y=10):
     debug_rect=debug_surf.get_rect(topleft=(x,y))
     display_surface.blit(debug_surf,debug_rect)
 
-def highlight_hitbox(highlight_box, image, color):
 
-    highlight = pygame.Surface(highlight_box.size)
-    if color == "yellow":
-        highlight.fill((255, 255, 0))
-    if color == "green":
-        highlight.fill((0, 255, 0))
-    highlight.set_alpha(128)
-    image.blit(highlight, (4, 4))
+def get_time(func):
+    def wrapper(*args, **kwargs):
+        start_time = default_timer()
+        output = func(*args, **kwargs)
+        end_time = default_timer()-start_time
+        print(f"Function Time = {end_time}")
+        return output
+    return wrapper

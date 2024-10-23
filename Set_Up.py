@@ -5,12 +5,15 @@ Created on Wed Aug  9 15:30:57 2023
 @author: footb
 """
 import pygame
-from pytmx.util_pygame import load_pygame
 
 TILE_SIZE = 16
 
-WIDTH = 28*TILE_SIZE
-HEIGHT = 36*TILE_SIZE
+WIDTH = 28
+HEIGHT = 36
+
+TOTAL_WIDTH = 28*TILE_SIZE
+TOTAL_HEIGHT = 36*TILE_SIZE
+
 FPS = 120
 
 pygame.init()

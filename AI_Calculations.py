@@ -1,3 +1,5 @@
+from Set_Up import *
+
 
 def neighbor_tile_calculator(coordinates):
     neighbors = [(coordinates[0] + 1, coordinates[1], True),
@@ -74,5 +76,38 @@ def get_time(pos1, pos2, speed):
     time = distanse/speed
     return round(time)
 
+def validate_neighbors(coordinates_list, tiles):
 
+    valid_neighbors = []
+    for coordinates in coordinates_list:
+        append = True
+        if coordinates[0] >= WIDTH or coordinates[0] < 0 or coordinates[1] >= HEIGHT or coordinates[1] < 0:
+            continue
+        for tile in tiles:
+            if tile.coordinates == coordinates[0:2] and tile.pathed == False:
+                if tile.sprite:
+                    for group in tile.sprite.groups:
+                        if group.name == 'wall_sprites':
+                            append = False
+            
+                if append == True:
+                    valid_neighbors.append(coordinates[0:2])
+                    tile.pathed = True
+
+        
+    return valid_neighbors
+                           
+
+def cascade(path_list, tiles) -> list:
+
+    all_list = list()
+    all_list.clear()
+    for path in path_list:
+        starting_point = path[-1]
+        neighbor_list = validate_neighbors(neighbor_tile_calculator(starting_point), tiles)
+        for tile in neighbor_list:
+            current_list = (path[:])
+            current_list.append(tile)
+            all_list.append(current_list)
+    return all_list
 

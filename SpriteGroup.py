@@ -1,8 +1,7 @@
 class SpriteGroup(list):
-    def __init__(self, *args):
+    def __init__(self, name, *args):
         super().__init__(*args)
-        for arg, val in  enumerate(args):
-            print(f"{val} = {arg}")
+        self.name = name
     
     def update(self):
         for num, sprite in enumerate(self):

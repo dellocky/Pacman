@@ -11,7 +11,7 @@ from Set_Up import *
 from Tile import Tile
 from Object_Sprite import Object_Sprite
 from Player import Player
-#from Debug import debug
+from Debug import debug
 from Enemy import Enemy
 from SpriteGroup import SpriteGroup
 
@@ -34,7 +34,6 @@ class Level:
         self.create_map()
 
     #turns X and Y corrdinates into objects for pathfinding
-    
     def create_tiles(self):
     
 
@@ -46,10 +45,8 @@ class Level:
                 x += 1
             y += 1
             x = 0
-    
         
     #attaches sprites to tiles based off the coordinates as well as creating moving sprites
-    
     def create_map(self):
         layouts = {
             'Walls' : CSV.csv_layout('Map Layout/PacMan Layout_Walls.csv'),
@@ -69,7 +66,6 @@ class Level:
                 for col_index, col in enumerate(row):
                     x = col_index * TILE_SIZE
                     y = row_index * TILE_SIZE
-                    
                     if col != '-1':
                       if style == 'Walls':
                             surf = graphics['Walls'][int(col)][0]
@@ -84,7 +80,6 @@ class Level:
                              surf = graphics['Gate'][int(col)][0]
                              self.tile_map[col_index, row_index].sprite = Object_Sprite(graphics['Gate'][int(col)][1], (x, y),[self.obstacle_sprites, self.wall_sprites], TILE_SIZE*.75, surf)
                              self.tile_map[col_index, row_index].wall = True
-                       
         
         self.flag_map = []
         current_row = []
@@ -112,13 +107,15 @@ class Level:
     def run(self):
 
         if  self.is_ticking:
-
             self.player.update()
             self.wall_sprites.update()
             self.object_sprites.update()
             self.enemy_sprites.update()
 
-   
+        for tile in self.tile_map.values():
+            if tile.draw:
+                tile.drawer()
+            
        
        
         
